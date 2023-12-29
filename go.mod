@@ -1,4 +1,4 @@
-module golang-project-template
+module DoctorWho
 
 go 1.21.1
 
