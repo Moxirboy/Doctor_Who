@@ -29,6 +29,6 @@ services:
     image: postgres:latest
     environment:
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: DoctorWho
+      POSTGRES_DB: doctorWho
     ports:
       - "5432"
