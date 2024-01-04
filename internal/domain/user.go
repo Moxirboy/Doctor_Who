@@ -3,13 +3,12 @@ package domain
 import "time"
 
 type User struct {
-	id           int
-	phone_number string
-	password     string
-	role         string
-	created_at   time.Time
-	updated_at   time.Time
-	deleted_at   *time.Time
+	id           int        `json:"id"`
+	phone_number string     `json:"phone_Number"`
+	role         string     `json:"role"`
+	created_at   time.Time  `json:"created_At"`
+	updated_at   time.Time  `json:"updated_At"`
+	deleted_at   *time.Time `json:"deleted___at"`
 }
 
 func (u User) Id() int {
@@ -18,10 +17,6 @@ func (u User) Id() int {
 
 func (u User) Phone_number() string {
 	return u.phone_number
-}
-
-func (u User) Password() string {
-	return u.password
 }
 
 func (u User) Role() string {
@@ -42,5 +37,4 @@ func (u User) Deleted_at() *time.Time {
 
 type NewUser struct {
 	PhoneNumber string `json:"phone_number"`
-	Password    string `json:"password"`
 }

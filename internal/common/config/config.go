@@ -17,7 +17,7 @@ type Postgres struct {
 	Host     string `env:"POSTGRES_HOST"`
 	Password string `env:"POSTGRES_PASSWORD"`
 	User     string `env:"POSTGRES_USER"`
-	Database string `env:"POSTGRES_DBNAME"`
+	Database string `env:"POSTGRES_DATABASE"`
 	SslMode  string `env:"POSTGRES_SSLMODE"`
 }
 type JWT struct {

@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+
 	instance := configs.Configuration()
 	postgres, err := configs.NewPostgresConfig(*instance)
 	if err != nil {
@@ -20,6 +21,8 @@ func main() {
 	controller := rest.NewController(service)
 	router := mux.NewRouter()
 	router.HandleFunc("/signUp", controller.SignUp)
+	router.HandleFunc("/login", controller.Login)
+	router.HandleFunc("/get", controller.GetAll)
 	server := &http.Server{Addr: ":5005", Handler: router}
 	server.ListenAndServe()
 }
