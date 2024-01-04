@@ -26,7 +26,8 @@ type Repo interface {
 	GetAll() []dto.User
 	UpdatePhoneNumber(number string) (int, error)
 	UpdateInfo(user dto.UserInfo) (int, error)
-	CreateProgram(ageUp, ageDown int, bmi float64, programType domain.ProgramType, proType domain.ProType) (id int, err error) }
+	CreateProgram(ageUp, ageDown int, bmi float64, programType domain.ProgramType, proType domain.ProType) (id int, err error)
+}
 
 func NewRepo(db *sql.DB) Repo {
 	return &repo{db: db}
@@ -107,7 +108,7 @@ func (r repo) GetProgramByAge(age int) (int, error) {
 	query := `
 	select id from programs where  ageUp>$1 and ageDown<$1 and type=$2 and pro_type=$3
 `
-	rows, err := r.db.Query(query, age, domain.StressWork,domain.Personal)
+	rows, err := r.db.Query(query, age, domain.StressWork, domain.Personal)
 	for rows.Next() {
 		var id int
 		err = rows.Scan(&id)
@@ -135,112 +136,101 @@ func (r repo) GetRecommendedProgramByAge(age int) ([]int, error) {
 	}
 	return ids, nil
 }
-func (r repo ) GetProgramForWeightLoss(age int, bmi float64) (int,error){
+func (r repo) GetProgramForWeightLoss(age int, bmi float64) (int, error) {
 	var ids []int
-	query:=`
+	query := `
 		select id from programs where ageUp>$1 and ageDown<$1 and bmiUp>$2 and bmiDown<$2 and type=$3 and pro_type=$4
 `
-	rows,err:=r.db.Query(query,age,bmi,domain.WeightLoss,domain.Personal)
-	if err!=nil{
+	rows, err := r.db.Query(query, age, bmi, domain.WeightLoss, domain.Personal)
+	if err != nil {
 		return 0, domain.ErrCouldNotRetrieveFromDataBase
 	}
-	for rows.Next(){
+	for rows.Next() {
 		var id int
-		err=rows.Scan(&id)
-		if err!=nil{
+		err = rows.Scan(&id)
+		if err != nil {
 			return 0, domain.ErrCouldNotScan
 		}
-		ids=append(ids,id)
+		ids = append(ids, id)
 	}
-	id :=r.Random(ids)
-	return id,nil
+	id := r.Random(ids)
+	return id, nil
 }
-func (r repo ) GetRecommendedProgramForWeightLoss(age int, bmi float64) (ids []int,err error){
+func (r repo) GetRecommendedProgramForWeightLoss(age int, bmi float64) (ids []int, err error) {
 
-	query:=`
+	query := `
 		select id from programs where ageUp>$1 and ageDown<$1 and bmiUp>$2 and bmiDown<$2 and type=$3 and pro_type=$4
 `
-	rows,err :=r.db.Query(query,age,bmi,domain.WeightLoss,domain.Personal)
-	if err!=nil{
+	rows, err := r.db.Query(query, age, bmi, domain.WeightLoss, domain.Personal)
+	if err != nil {
 		return nil, domain.ErrCouldNotRetrieveFromDataBase
 	}
-	for rows.Next(){
+	for rows.Next() {
 		var id int
-		err=rows.Scan(&id)
-		if err!=nil{
+		err = rows.Scan(&id)
+		if err != nil {
 			return nil, domain.ErrCouldNotScan
 		}
-		ids=append(ids,id)
+		ids = append(ids, id)
 	}
 
-	return ids,nil
+	return ids, nil
 }
-func (r repo) CreateProgramChosen(userId,programId int) (id int ,err error){
-	query:=`
+func (r repo) CreateProgramChosen(userId, programId int) (id int, err error) {
+	query := `
 		insert into program_chosen(program_id,user_id) values($1,$2) returning id
 `
-	err=r.db.QueryRow(query).Scan(&id)
-	if err!=nil{
+	err = r.db.QueryRow(query).Scan(&id)
+	if err != nil {
 		return 0, domain.ErrCouldNotScan
 	}
 	return id, nil
 }
-CREATE TABLE exercise (
-id SERIAL PRIMARY KEY,
-program_id INT,
-name VARCHAR(255),
-info varchar(255),
-CONSTRAINT fk_exercise_program FOREIGN KEY (program_id) REFERENCES programs(id)
-);
-
-func (r repo ) CreateExercise(name ,info string,programId int) (id int ,err error){
-	query:=`
+func (r repo) CreateExercise(name, info string, programId int) (id int, err error) {
+	query := `
 		insert into exercise(program_id,name,info) values($1,$2,$3) returning id
 `
-	err=r.db.QueryRow(query,programId ,name,info).Scan(&id)
+	err = r.db.QueryRow(query, programId, name, info).Scan(&id)
 	if err != nil {
 		return 0, domain.ErrCouldNotScan
 	}
-	return id,nil
+	return id, nil
 }
-func (r repo) GetAllExercise(){
+func (r repo) GetAllExercise() {
 	// TODO implement
 }
-func (r repo) GetExerciseByProgram(){
+func (r repo) GetExerciseByProgram() {
 	//Todo implement
 }
-func (r repo ) UpdateExercise(){
+func (r repo) UpdateExercise() {
 	// TODO implement
 }
-func (r repo) DeleteExercise(){
+func (r repo) DeleteExercise() {
 	// TODO impolement
 }
-func (r repo ) CreateExerciseChose(){
+func (r repo) CreateExerciseChose() {
 	//Todo implement
 }
-func(r repo) GetAllExerciseChoosen(){
+func (r repo) GetAllExerciseChoosen() {
 	//Todo implement
 }
 
-func (r repo ) GetExerciseChoosenByUserId(){
+func (r repo) GetExerciseChoosenByUserId() {
 	//todo implement
 }
-func (r repo) GetExerciseChoosenByProgramId(){
+func (r repo) GetExerciseChoosenByProgramId() {
 	//todo implement
 }
-func (r repo ) GetDoneExerciseChoosenByUserID(){
+func (r repo) GetDoneExerciseChoosenByUserID() {
 	//todo implement
 }
-func ( r repo) UpdateExerciseChoosen(){
+func (r repo) UpdateExerciseChoosen() {
 
 }
-
 
 //func (r repo ) GetRecommended
 
-
-
-func (r repo ) Random(ids []int) int{
+func (r repo) Random(ids []int) int {
 	// TODO implement
 	return 0
 }
