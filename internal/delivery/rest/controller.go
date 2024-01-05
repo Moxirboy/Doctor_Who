@@ -133,6 +133,7 @@ func (c controller) Logout(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode("success")
 }
+
 func (c controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	user := c.usecase.GetAll()
 	log.Println(user)
