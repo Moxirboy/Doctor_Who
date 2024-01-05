@@ -3,7 +3,9 @@ package configs
 import (
 	"database/sql"
 	"fmt"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"log"
 )
 
 func NewPostgresConfig(cfg Config) (*sql.DB, error) {
@@ -19,4 +21,11 @@ func NewPostgresConfig(cfg Config) (*sql.DB, error) {
 	}
 
 	return instance, nil
+}
+func NewBotConfig(cfg Config) (*tgbotapi.BotAPI, error) {
+	bot, err := tgbotapi.NewBotAPI(cfg.BotToken)
+	if err != nil {
+		log.Println(err)
+	}
+	return bot, nil
 }

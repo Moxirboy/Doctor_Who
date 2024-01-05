@@ -1,4 +1,4 @@
-package domain
+package _const
 
 type ProgramType string
 type ProType string

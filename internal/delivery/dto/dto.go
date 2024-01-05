@@ -1,9 +1,8 @@
 package dto
 
-import "DoctorWho/internal/domain"
-
 type User struct {
-	Phone_number string `json:"phone_Number"`
+	Id    string `json:"id"`
+	Email string `json:"email"`
 }
 type UserInfo struct {
 	Name   string `json:"name"`
@@ -13,6 +12,15 @@ type UserInfo struct {
 	Waist  string `json:"waist"`
 }
 type Program struct {
-	Id          int                `json:"id"`
-	ProgramType domain.ProgramType `json:"programType"`
+	Id          int         `json:"id"`
+	ProgramType ProgramType `json:"programType"`
 }
+type ProgramType string
+type ProType string
+
+const (
+	WeightLoss  = ProgramType("weight_loss")
+	StressWork  = ProgramType("stress_work")
+	Recommended = ProType("recommended")
+	Personal    = ProType("personal")
+)

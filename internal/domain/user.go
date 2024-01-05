@@ -3,12 +3,12 @@ package domain
 import "time"
 
 type User struct {
-	id           int        `json:"id"`
-	phone_number string     `json:"phone_Number"`
-	role         string     `json:"role"`
-	created_at   time.Time  `json:"created_At"`
-	updated_at   time.Time  `json:"updated_At"`
-	deleted_at   *time.Time `json:"deleted___at"`
+	id           int
+	phone_number string
+	role         string
+	created_at   time.Time
+	updated_at   time.Time
+	deleted_at   *time.Time
 }
 
 func (u User) Id() int {
@@ -36,5 +36,5 @@ func (u User) Deleted_at() *time.Time {
 }
 
 type NewUser struct {
-	PhoneNumber string `json:"phone_number"`
+	PhoneNumber string `json:"email"`
 }
