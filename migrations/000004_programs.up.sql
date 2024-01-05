@@ -6,6 +6,7 @@ CREATE TYPE pro_type AS ENUM ('recommended', 'personal');
 CREATE TABLE programs (
                           id SERIAL PRIMARY KEY,
                           ageUp int  NOT NULL,
+
                             ageDown int NOT NULL,
                           bmiUp decimal  NOT NULL,
                           bmiDown decimal  NOT NULL,
