@@ -28,7 +28,7 @@ func (f Factory) CreateDoctor(newUser *NewUser) *User {
 }
 func (f Factory) ParseModelToDomain(id int, phoneNumber string, role string, createdAt time.Time, updatedAt time.Time, deletedAt *time.Time) dto.User {
 	return dto.User{
-		Phone_number: phoneNumber,
+		Email: phoneNumber,
 	}
 }
 func (f Factory) ParseDomainToModel(u User) {

@@ -1,10 +1,11 @@
 package repository
 
 import (
+	"DoctorWho/internal/common/const"
 	"DoctorWho/internal/delivery/dto"
 	"DoctorWho/internal/domain"
+	"DoctorWho/internal/pkg/Bot"
 	"database/sql"
-	"log"
 	"time"
 )
 
@@ -17,46 +18,67 @@ type userDB struct {
 	deleted_at   *time.Time
 }
 type repo struct {
-	db *sql.DB
-	f  domain.Factory
+	db  *sql.DB
+	f   domain.Factory
+	Bot Bot.Bot
 }
 type Repo interface {
 	Register(user domain.User) (int, error)
-	Exist(Number string) (bool, error)
+	Exist(email string) (bool, error)
+	GetByEmail(email string) (id int, err error)
 	GetAll() []dto.User
 	UpdatePhoneNumber(number string) (int, error)
 	UpdateInfo(user dto.UserInfo) (int, error)
-	CreateProgram(ageUp, ageDown int, bmi float64, programType domain.ProgramType, proType domain.ProType) (id int, err error)
+	CreateProgram(ageUp, ageDown int, bmi float64, programType _const.ProgramType, proType _const.ProType) (id int, err error)
+	UpdateIsUsed(userId string, code string) (id int, err error)
+	UpdateVerified(userId string) (id int, err error)
+	GetVerificationCode(id string) (code string, err error)
+	CreateVerificationCode(id int, code string) (err error)
 }
 
-func NewRepo(db *sql.DB) Repo {
-	return &repo{db: db}
+func NewRepo(db *sql.DB, bot Bot.Bot) Repo {
+	return &repo{db: db,
+		Bot: bot,
+	}
 }
 func (r repo) Register(user domain.User) (id int, err error) {
 	query := `
-	insert into users (phone_number,password,role,created_at,updated_at,deleted_at) values($1,$2,$3,$4,$5,$6) returning id
+	insert into users (email,role,created_at,updated_at,deleted_at) values($1,$2,$3,$4,$5) returning id
 `
 	row := r.db.QueryRow(query, user.Phone_number(), user.Role(), user.Created_at(), user.Updated_at(), user.Deleted_at())
 	if err := row.Scan(&id); err != nil {
+		r.Bot.SendErrorNotification(err)
 		return 0, err
 	}
 	return id, nil
 }
-func (r repo) Exist(Number string) (exist bool, err error) {
+func (r repo) Exist(email string) (exist bool, err error) {
 
 	query := `
 Select Exists (
 			SELECT 1
 			FROM users
-			WHERE phone_number = $1)
+			WHERE email = $1)
 		
 `
-	err = r.db.QueryRow(query, Number).Scan(&exist)
+	err = r.db.QueryRow(query, email).Scan(&exist)
 	if err != nil {
+		r.Bot.SendErrorNotification(err)
 		return false, domain.ErrCouldNotScan
 	}
 
 	return exist, nil
+}
+func (r repo) GetByEmail(email string) (id int, err error) {
+	query := `
+		select id from users where email=$1
+`
+	err = r.db.QueryRow(query, email).Scan(&id)
+	if err != nil {
+		r.Bot.SendErrorNotification(err)
+		return 0, err
+	}
+	return id, nil
 }
 func (r repo) GetAll() (User []dto.User) {
 	var user userDB
@@ -65,13 +87,13 @@ func (r repo) GetAll() (User []dto.User) {
 `
 	rows, err := r.db.Query(query)
 	if err != nil {
-		log.Println(err)
+		r.Bot.SendErrorNotification(err)
 	}
 	for rows.Next() {
 
 		err := rows.Scan(&user.id, &user.phone_number, &user.role, &user.created_at, &user.updated_at, &user.deleted_at)
 		if err != nil {
-			log.Println(err)
+			r.Bot.SendErrorNotification(err)
 		}
 
 		User = append(User, r.f.ParseModelToDomain(user.id, user.phone_number, user.role, user.created_at, user.updated_at, user.deleted_at))
@@ -87,16 +109,18 @@ func (r repo) UpdateInfo(user dto.UserInfo) (id int, err error) {
 `
 	row := r.db.QueryRow(query, user.Name, user.Weigh, user.Height, user.Age, user.Waist)
 	if err = row.Scan(&id); err != nil {
+		r.Bot.SendErrorNotification(err)
 		return 0, err
 	}
 	return id, nil
 }
-func (r repo) CreateProgram(ageUp, ageDown int, bmi float64, programType domain.ProgramType, proType domain.ProType) (id int, err error) {
+func (r repo) CreateProgram(ageUp, ageDown int, bmi float64, programType _const.ProgramType, proType _const.ProType) (id int, err error) {
 	query := `
 	insert into programs (type,ageUp,ageDown,bmi,pro_type) values ($1,$2,$3,$4,$5) returning id
 `
 	err = r.db.QueryRow(query, programType, ageUp, ageDown, bmi, proType).Scan(&id)
 	if err != nil {
+		r.Bot.SendErrorNotification(err)
 		return 0, domain.ErrCouldNotCreateProgram
 	}
 	return id, nil
@@ -108,11 +132,12 @@ func (r repo) GetProgramByAge(age int) (int, error) {
 	query := `
 	select id from programs where  ageUp>$1 and ageDown<$1 and type=$2 and pro_type=$3
 `
-	rows, err := r.db.Query(query, age, domain.StressWork, domain.Personal)
+	rows, err := r.db.Query(query, age, _const.StressWork, _const.Personal)
 	for rows.Next() {
 		var id int
 		err = rows.Scan(&id)
 		if err != nil {
+			r.Bot.SendErrorNotification(err)
 			return 0, domain.ErrCouldNotScan
 		}
 		ids = append(ids, id)
@@ -125,11 +150,12 @@ func (r repo) GetRecommendedProgramByAge(age int) ([]int, error) {
 	query := `
 	select id from programs  where  ageUp>$1 and ageDown<$1 and type=$2 and pro_type=$3
 `
-	rows, err := r.db.Query(query, age, domain.StressWork, domain.Recommended)
+	rows, err := r.db.Query(query, age, _const.StressWork, _const.Recommended)
 	for rows.Next() {
 		var id int
 		err = rows.Scan(&id)
 		if err != nil {
+			r.Bot.SendErrorNotification(err)
 			return nil, domain.ErrCouldNotScan
 		}
 		ids = append(ids, id)
@@ -141,14 +167,16 @@ func (r repo) GetProgramForWeightLoss(age int, bmi float64) (int, error) {
 	query := `
 		select id from programs where ageUp>$1 and ageDown<$1 and bmiUp>$2 and bmiDown<$2 and type=$3 and pro_type=$4
 `
-	rows, err := r.db.Query(query, age, bmi, domain.WeightLoss, domain.Personal)
+	rows, err := r.db.Query(query, age, bmi, _const.WeightLoss, _const.Personal)
 	if err != nil {
+		r.Bot.SendErrorNotification(err)
 		return 0, domain.ErrCouldNotRetrieveFromDataBase
 	}
 	for rows.Next() {
 		var id int
 		err = rows.Scan(&id)
 		if err != nil {
+			r.Bot.SendErrorNotification(err)
 			return 0, domain.ErrCouldNotScan
 		}
 		ids = append(ids, id)
@@ -161,14 +189,16 @@ func (r repo) GetRecommendedProgramForWeightLoss(age int, bmi float64) (ids []in
 	query := `
 		select id from programs where ageUp>$1 and ageDown<$1 and bmiUp>$2 and bmiDown<$2 and type=$3 and pro_type=$4
 `
-	rows, err := r.db.Query(query, age, bmi, domain.WeightLoss, domain.Personal)
+	rows, err := r.db.Query(query, age, bmi, _const.WeightLoss, _const.Personal)
 	if err != nil {
+		r.Bot.SendErrorNotification(err)
 		return nil, domain.ErrCouldNotRetrieveFromDataBase
 	}
 	for rows.Next() {
 		var id int
 		err = rows.Scan(&id)
 		if err != nil {
+			r.Bot.SendErrorNotification(err)
 			return nil, domain.ErrCouldNotScan
 		}
 		ids = append(ids, id)
@@ -182,6 +212,7 @@ func (r repo) CreateProgramChosen(userId, programId int) (id int, err error) {
 `
 	err = r.db.QueryRow(query).Scan(&id)
 	if err != nil {
+		r.Bot.SendErrorNotification(err)
 		return 0, domain.ErrCouldNotScan
 	}
 	return id, nil
@@ -192,6 +223,7 @@ func (r repo) CreateExercise(name, info string, programId int) (id int, err erro
 `
 	err = r.db.QueryRow(query, programId, name, info).Scan(&id)
 	if err != nil {
+		r.Bot.SendErrorNotification(err)
 		return 0, domain.ErrCouldNotScan
 	}
 	return id, nil
@@ -226,6 +258,54 @@ func (r repo) GetDoneExerciseChoosenByUserID() {
 }
 func (r repo) UpdateExerciseChoosen() {
 
+}
+func (r repo) CreateVerificationCode(id int, code string) (err error) {
+	query := `
+		insert into verify_emails(user_id,secret_code,is_used) values($1,$2,$3)
+`
+	_, err = r.db.Exec(query, id, code, false)
+	if err != nil {
+		r.Bot.SendErrorNotification(err)
+		return err
+	}
+	return nil
+
+}
+
+func (r repo) GetVerificationCode(id string) (code string, err error) {
+	query := `
+		select secret_code from verify_emails where user_id=$1 and is_used=$2
+`
+	err = r.db.QueryRow(query, id, false).Scan(&code)
+	if err != nil {
+		r.Bot.SendErrorNotification(err)
+		return "", domain.ErrCouldNotScan
+	}
+
+	return code, nil
+}
+func (r repo) UpdateIsUsed(userId string, code string) (id int, err error) {
+	query := `
+		update verify_emails set is_used=$1 where user_id=$2 and secret_code=$3 returning id
+	`
+	err = r.db.QueryRow(query, true, userId, code).Scan(&id)
+	if err != nil {
+		r.Bot.SendErrorNotification(err)
+		return 0, err
+
+	}
+	return id, nil
+}
+func (r repo) UpdateVerified(userId string) (id int, err error) {
+	query := `
+		Update users set is_email_verified=$1 where user_id=$2 returning id
+`
+	err = r.db.QueryRow(query, true, userId).Scan(&id)
+	if err != nil {
+		r.Bot.SendErrorNotification(err)
+		return 0, err
+	}
+	return id, nil
 }
 
 //func (r repo ) GetRecommended

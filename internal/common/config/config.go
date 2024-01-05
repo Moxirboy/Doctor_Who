@@ -11,6 +11,7 @@ type Config struct {
 	Postgres
 	JWT
 	InitConfig
+	BotConfig
 }
 type Postgres struct {
 	Port     string `env:"POSTGRES_PORT"`
@@ -27,6 +28,9 @@ type JWT struct {
 }
 type InitConfig struct {
 	RunPort string `env:"RUN_PORT"`
+}
+type BotConfig struct {
+	BotToken string `env:"BOT_TOKEN"`
 }
 
 var instance Config
