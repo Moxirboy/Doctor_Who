@@ -23,7 +23,7 @@ const chatID = int64(-1002129341182)
 func (b bot) SendErrorNotification(err error) {
 	// Replace "USER_CHAT_ID" with the actual user's chat ID to send the notification
 
-	message := time.Now().Format("02 January 2006 15:04:05\n") + "Error occurred: "
+	message := time.Now().Format("2006/02/31  15:04:05\n") + "Error occurred: "
 	msg := tgbotapi.NewMessage(chatID, message+err.Error())
 	_, err = b.Send(msg)
 	if err != nil {
@@ -34,7 +34,7 @@ func (b bot) SendErrorNotification(err error) {
 func (b bot) SendNotification(mess string) {
 	// Replace "USER_CHAT_ID" with the actual user's chat ID to send the notification
 
-	message := time.Now().Format("02 January 2006 15:04:05 \nmessage: ") + mess
+	message := time.Now().Format("2006/02/31  15:04:05 \nmessage: ") + mess
 	msg := tgbotapi.NewMessage(chatID, message)
 	_, err := b.Send(msg)
 	if err != nil {
