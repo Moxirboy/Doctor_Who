@@ -34,23 +34,3 @@ func (f Factory) ParseModelToDomain(id int, phoneNumber string, role string, cre
 func (f Factory) ParseDomainToModel(u User) {
 
 }
-func (f Factory) ParseModelToUserInfo(u dto.UserInfo) *UserInfo {
-	return &UserInfo{
-		Id: u.Id,
-		Name:      u.Name,
-		Weigh:     u.Weigh,
-		Height:    u.Height,
-		Age:       u.Age,
-		Waist:     u.Waist,
-		UpdatedAt: time.Now(),
-	}
-}
-func (f Factory) ParseUserInfoToModel(u UserInfo)  *dto.UserInfo{
-	return &dto.UserInfo{
-		Name:      u.Name,
-		Weigh:     u.Weigh,
-		Height:    u.Height,
-		Age:       u.Age,
-		Waist:     u.Waist,
-	}
-}

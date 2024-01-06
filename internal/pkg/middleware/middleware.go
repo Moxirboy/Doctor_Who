@@ -1,46 +1,43 @@
 package middleware
 
 import (
-	jwt "DoctorWho/internal/pkg/jwt"
+	_jwt "DoctorWho/internal/pkg/jwt"
+	"context"
 	"net/http"
 	"strings"
-	"github.com/gin-gonic/gin"
 )
 
-func AuthMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		accessToken := c.GetHeader("Authorization")
+func AuthMiddleWare(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		accessToken := r.Header.Get("Authorization")
 
 		if len(accessToken) == 0 {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is not provided"})
+			http.Error(w, "error:authorization header is not provided", http.StatusUnauthorized)
 			return
 		}
 
 		if !strings.HasPrefix(accessToken, "Bearer ") {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid Authorization header format"})
-			return
+			http.Error(w, "Invalid Authorization header format", http.StatusUnauthorized)
 		}
 
 		// Extract the token from the header
 		token := strings.TrimPrefix(accessToken, "Bearer ")
 
-		claims, err := jwt.VerifyToken(token)
+		claims, err := _jwt.VerifyToken(token)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token", "details": err.Error()})
+			http.Error(w, "error: "+err.Error(), http.StatusUnauthorized)
 			return
 		}
 
 		_, ok := claims["sub"].(string)
 		if !ok {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid subject in token"})
+			http.Error(w, "error: Invalid subject in token", http.StatusUnauthorized)
 			return
 		}
 
-		// You can add more validations or actions here if needed.
+		ctx := context.WithValue(r.Context(), "claims", claims)
+		r = r.WithContext(ctx)
 
-		// Set the claims in the context for later use
-		c.Set("claims", claims)
-
-		c.Next()
-	}
+		next.ServeHTTP(w, r)
+	})
 }

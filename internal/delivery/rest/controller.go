@@ -5,14 +5,12 @@ import (
 	"DoctorWho/internal/domain"
 	"DoctorWho/internal/pkg/Bot"
 	"DoctorWho/internal/pkg/jwt"
+	"DoctorWho/internal/pkg/session"
 	"DoctorWho/internal/pkg/sms"
 	"DoctorWho/internal/usecase"
 	"encoding/json"
 	"log"
 	"net/http"
-
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
 )
 
 type controller struct {
@@ -24,38 +22,47 @@ func NewController(usecase usecase.Usecase) *controller {
 	return &controller{usecase: usecase}
 }
 
-func (c controller) SignUp(ctx *gin.Context) {
-	s:=sessions.Default(ctx)
+func (c controller) SignUp(w http.ResponseWriter, r *http.Request) {
+	sessions, _ := session.Store.Get(r, "User")
 	var NewUser domain.NewUser
-	err := ctx.ShouldBindJSON(&NewUser)
+	err := json.NewDecoder(r.Body).Decode(&NewUser)
 	if err != nil {
 		c.bot.SendErrorNotification(err)
-		ctx.String(http.StatusInternalServerError,"Invalid json")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode("Invalid json")
 	}
 	log.Println(NewUser.PhoneNumber)
 	id, err := c.usecase.RegisterUser(&NewUser)
 	if err != nil {
 		c.bot.SendErrorNotification(err)
-		ctx.String(http.StatusInternalServerError,"Could`nt register")
-		
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode("Could`nt register")
 	}
-	s.Set("userId", id)
-	s.Save()
-	ctx.String(http.StatusOK,"verification code sent")
+	sessions.Values["userId"] = id
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(id)
 }
 
-func (c controller) Login(ctx *gin.Context) {
-	s:=sessions.Default(ctx)
+func (c controller) Login(w http.ResponseWriter, r *http.Request) {
+	sessions, _ := session.Store.Get(r, "User")
 	var User dto.User
-	err := ctx.ShouldBindJSON(&User)
+	err := json.NewDecoder(r.Body).Decode(&User)
 	if err != nil {
 		c.bot.SendErrorNotification(err)
-		ctx.String(http.StatusInternalServerError,"Invalid json")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode("Invalid json")
 	}
 	exist, id, err := c.usecase.Login(User.Email)
 	if err != nil {
 		c.bot.SendErrorNotification(err)
-		ctx.String(http.StatusInternalServerError,"Could`nt login")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode("Could`nt login")
 	}
 	if exist {
 		code := sms.GenerateVerificationCode()
@@ -64,22 +71,29 @@ func (c controller) Login(ctx *gin.Context) {
 		c.bot.SendNotification(User.Email)
 		if err != nil {
 			c.bot.SendErrorNotification(err)
-			ctx.String(http.StatusUnauthorized,"invalid credentials")
+			http.Error(w, "invalid credentials", http.StatusUnauthorized)
 		}
-		s.Set("userId", id)
-	    s.Save()
-	    ctx.String(http.StatusOK,"verification code sent")
-		
+		sessions.Values["userId"] = id
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		err = json.NewEncoder(w).Encode("verification code sent")
+		if err != nil {
+			c.bot.SendErrorNotification(err)
+			return
+		}
 	} else {
-		ctx.String(http.StatusUnauthorized,"invalid credentials")
+		http.Error(w, "invalid credentials", http.StatusUnauthorized)
 	}
 
 }
-func (c controller) Verification(ctx *gin.Context) {
-	s:=sessions.Default(ctx)
-	id:= s.Get("userId")
+func (c controller) Verification(w http.ResponseWriter, r *http.Request) {
+
+	sessions, _ := session.Store.Get(r, "User")
+
 	var message domain.Sms
-	err := ctx.ShouldBindJSON(&message)
+	err := json.NewDecoder(r.Body).Decode(&message)
+	id := sessions.Values["userId"]
 	if id == nil {
 		c.bot.SendErrorNotification(err)
 		id = message.UserId
@@ -87,96 +101,37 @@ func (c controller) Verification(ctx *gin.Context) {
 	}
 	if err != nil {
 		c.bot.SendErrorNotification(err)
-		ctx.Set("Content-Type", "application/json")
-		ctx.Status(http.StatusInternalServerError)
-		ctx.String(500,"Invalid json")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode("Invalid json")
 	}
 	match, err := c.usecase.Verify(id.(string), message.Code)
 	if err != nil {
 		c.bot.SendErrorNotification(err)
-		ctx.String( http.StatusUnauthorized,"Not matched")
+		http.Error(w, "Not matched", http.StatusUnauthorized)
 	}
 	if match {
 		token, err := jwt.CreateToken(id.(string))
 		if err != nil {
 			c.bot.SendErrorNotification(err)
-			ctx.String( http.StatusInternalServerError ,"error occurred: "+err.Error())
+			http.Error(w, "error occurred: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 		response := map[string]string{
 			"access_token": token,
 		}
-		ctx.JSON(200,response)
-	}
-}
-func (c controller) Logout(ctx *gin.Context) {
-	s:=sessions.Default(ctx)
-	s.Clear()
-	s.Save()
-	ctx.Set("Content-Type", "application/json")
-	ctx.Status(200)
-}
 
-func (c controller) FillUserInfo(ctx *gin.Context) {
-
-	
-	var UserInfo dto.UserInfo
-	err := ctx.ShouldBindJSON(&UserInfo)
-	if err != nil {
-		c.bot.SendErrorNotification(err)
-		ctx.JSON(406, gin.H{
-			"Message": "Invalid credentials",
-		})
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(response)
 	}
-	s:=sessions.Default(ctx)
-	UserInfo.Id=s.Get("userId").(int)
-	id, err := c.usecase.FillInfo(UserInfo)
-	if err != nil {
-		c.bot.SendErrorNotification(err)
-		ctx.JSON(400, gin.H{
-			"Message": "Bad request",
-		})
-	}
-	ctx.JSON(200, gin.H{
-		"Message": "success",
-		"Info id": id,
-	})
 }
-func (c controller) UpdateUserInfo(ctx *gin.Context){
-	var User dto.UserInfo
-	err:=ctx.ShouldBindJSON(&User)
-	if err!=nil{
-		c.bot.SendErrorNotification(err)
-		ctx.JSON(406, gin.H{
-			"Message": "Invalid credentials",
-		})
-	}
-	s:=sessions.Default(ctx)
-	User.Id=s.Get("userId").(int)
-	id, err:=c.usecase.UpdateInfo(User)
-	if err!=nil{
-		c.bot.SendErrorNotification(err)
-		ctx.String(400,"internal error")
-	}
-	ctx.String(200,"id: ",id)
-}
-func (c controller) ShowUserInfo(ctx *gin.Context){
-	var User dto.UserInfo
-	s:=sessions.Default(ctx)
-	User.Id=s.Get("userId").(int)
-	User ,err:=c.usecase.GetUserInfo(User.Id)
-	if err!=nil{
-		
-			c.bot.SendErrorNotification(err)
-			ctx.String(400,"internal error")
-		
-	}
-	ctx.JSON(200,User)
-}
-func (c controller) GetProgress(ctx *gin.Context) {
-	var progress dto.Progress
-	s:=sessions.Default(ctx)
-	progress.UserId=s.Get("userId").(int)
+func (c controller) Logout(w http.ResponseWriter, r *http.Request) {
+	sessions, _ := session.Store.Get(r, "User")
+	sessions.Values["userId"] = nil
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode("success")
 }
 
 func (c controller) GetAll(w http.ResponseWriter, r *http.Request) {

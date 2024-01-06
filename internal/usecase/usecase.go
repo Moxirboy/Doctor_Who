@@ -21,9 +21,6 @@ type Usecase interface {
 	Verify(id string, code string) (bool, error)
 	GetAll() (User []dto.User)
 	FillInfo(user dto.UserInfo) (int, error)
-	GetUserInfo(userId int)  (user dto.UserInfo,err error)
-	UpdateInfo( user dto.UserInfo) (id int, err error)
-	GetProgress(id int) (prog dto.Progress, err error)
 }
 
 func NewUserUsecase(repo repository.Repo, bot Bot.Bot) Usecase {
@@ -101,62 +98,5 @@ func (u usecase) GetAll() (User []dto.User) {
 	return u.repo.GetAll()
 }
 func (u usecase) FillInfo(user dto.UserInfo) (int, error) {
-	userInfo := u.f.ParseModelToUserInfo(user)
-	id, err := u.repo.CreateInfo(*userInfo)
-	if err != nil {
-		u.bot.SendErrorNotification(err)
-		return 0, err
-	}
-	return id, nil
-}
-func (u usecase) UpdateInfo( user dto.UserInfo) (id int, err error){
-	userInfo:=u.f.ParseModelToUserInfo(user)
-	if !Validator(userInfo.Name){
-		id ,err=u.repo.UpdateName(*userInfo)
-		if err!=nil{
-			u.bot.SendErrorNotification(err)
-			return 0,domain.Err("Coudn`t update")
-		}
-	}
-	if !Validator(userInfo.Height){
-		id ,err=u.repo.UpdateHeight(*userInfo)
-		if err!=nil{
-			u.bot.SendErrorNotification(err)
-			return 0,domain.Err("Coudn`t update")
-		}
-	}
-	if !Validator(userInfo.Age){
-		id ,err=u.repo.UpdateAge(*userInfo)
-		if err!=nil{
-			u.bot.SendErrorNotification(err)
-			return 0,domain.Err("Coudn`t update")
-		}
-	}
-	if !Validator(userInfo.Waist){
-		id ,err=u.repo.UpdateWaist(*userInfo)
-		if err!=nil{
-			u.bot.SendErrorNotification(err)
-			return 0,domain.Err("Coudn`t update")
-		}
-	}
-	if !Validator(userInfo.Weigh){
-		id ,err=u.repo.UpdateWeigh(*userInfo)
-		if err!=nil{
-			u.bot.SendErrorNotification(err)
-			return 0,domain.Err("Coudn`t update")
-		}
-	}
-	return id, nil
-}
-func (u usecase) GetUserInfo(userId int)  (user dto.UserInfo,err error){
-	userInfo,err:=u.repo.GetUserInfo(userId)
-	if err!=nil{
-		u.bot.SendErrorNotification(err)
-		return user,domain.ErrCouldNotScan
-	}
-	user=*u.f.ParseUserInfoToModel(userInfo)
-	return user,nil
-}
-func (u usecase) GetProgress(id int) (prog dto.Progress, err error) {
-	return prog, err
+	return u.repo.UpdateInfo(user)
 }
