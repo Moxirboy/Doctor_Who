@@ -7,6 +7,7 @@ import (
 	"DoctorWho/internal/pkg/Bot"
 	"database/sql"
 	"time"
+
 )
 
 type userDB struct {
@@ -28,7 +29,14 @@ type Repo interface {
 	GetByEmail(email string) (id int, err error)
 	GetAll() []dto.User
 	UpdatePhoneNumber(number string) (int, error)
-	UpdateInfo(user dto.UserInfo) (int, error)
+	CreateInfo(user domain.UserInfo) (int, error)
+	GetUserInfo(userId int) (domain.UserInfo,error)
+	UpdateInfo(user domain.UserInfo) (id int,err error)
+	UpdateName(user domain.UserInfo) (id int,err error)
+	UpdateWeigh(user domain.UserInfo) (id int,err error)
+	UpdateHeight(user domain.UserInfo) (id int,err error)
+	UpdateAge(user domain.UserInfo) (id int,err error)
+	UpdateWaist(user domain.UserInfo) (id int,err error)
 	CreateProgram(ageUp, ageDown int, bmi float64, programType _const.ProgramType, proType _const.ProType) (id int, err error)
 	UpdateIsUsed(userId string, code string) (id int, err error)
 	UpdateVerified(userId string) (id int, err error)
@@ -103,17 +111,120 @@ func (r repo) GetAll() (User []dto.User) {
 func (r repo) UpdatePhoneNumber(number string) (id int, err error) {
 	return 0, err
 }
-func (r repo) UpdateInfo(user dto.UserInfo) (id int, err error) {
+
+func (r repo) CreateInfo(user domain.UserInfo) (id int, err error) {
 	query := `
-	update user_info set user_id=$1,name=$2,weigh=$3,height=$4,age=$5,waist=$6 RETURNING id
+	insert into  user_info (user_id,name,weigh,height,age,waist,updated_at) values($1,$2,$3,$4,$5,$6,$7) RETURNING id
 `
-	row := r.db.QueryRow(query, user.Name, user.Weigh, user.Height, user.Age, user.Waist)
+	row := r.db.QueryRow(query, user.Id,user.Name, user.Weigh, user.Height, user.Age, user.Waist, user.UpdatedAt)
 	if err = row.Scan(&id); err != nil {
 		r.Bot.SendErrorNotification(err)
 		return 0, err
 	}
 	return id, nil
 }
+func (r repo )GetUserInfo(userId int) (user domain.UserInfo,err error){
+	query:=`
+	select name,weigh,height,age,waist from user_info where user_id=$1
+	`
+	err=r.db.QueryRow(query,userId).Scan(
+		&user.Name,
+		&user.Weigh,
+		&user.Height,
+		&user.Age,
+		&user.Waist,
+	)
+	if err!=nil{
+		r.Bot.SendErrorNotification(err)
+		return user,domain.ErrCouldNotScan
+	}
+	return user,nil
+}
+
+
+
+func (r repo) UpdateInfo(user domain.UserInfo) (id int,err error){
+	query:=`
+	update user_info set name=$2,weigh=$3,height=$4,age=$5,waist=$6,updated_at=$7 where user_id=$1 returning id
+	`
+	err =r.db.QueryRow(query,user.Id,user.Name, user.Weigh, user.Height, user.Age, user.Waist, user.UpdatedAt).Scan(&id)
+	if err!=nil{
+		r.Bot.SendErrorNotification(err)
+		return 0, domain.ErrCouldNotScan
+	}
+	return id ,nil
+}
+func (r repo) UpdateName(user domain.UserInfo) (id int,err error){
+	query:=`
+	update user_info set name=$2,updated_at=$3 where user_id=$1 returning id
+	`
+	err =r.db.QueryRow(query,user.Id,user.Name, user.UpdatedAt).Scan(&id)
+	if err!=nil{
+		r.Bot.SendErrorNotification(err)
+		return 0, domain.ErrCouldNotScan
+	}
+	return id ,nil
+}
+func (r repo) UpdateWeigh(user domain.UserInfo) (id int,err error){
+	query:=`
+	update user_info set weigh=$2,updated_at=$3 where user_id=$1 returning id
+	`
+	err =r.db.QueryRow(query,user.Id,user.Weigh, user.UpdatedAt).Scan(&id)
+	if err!=nil{
+		r.Bot.SendErrorNotification(err)
+		return 0, domain.ErrCouldNotScan
+	}
+	return id ,nil
+}
+func (r repo) UpdateHeight(user domain.UserInfo) (id int,err error){
+	query:=`
+	update user_info set height=$2,updated_at=$3 where user_id=$1 returning id
+	`
+	err =r.db.QueryRow(query,user.Id,user.Height, user.UpdatedAt).Scan(&id)
+	if err!=nil{
+		r.Bot.SendErrorNotification(err)
+		return 0, domain.ErrCouldNotScan
+	}
+	return id ,nil
+	
+}
+func (r repo) UpdateAge(user domain.UserInfo) (id int,err error){
+	query:=`
+	update user_info set age=$2,updated_at=$3 where user_id=$1 returning id
+	`
+	err =r.db.QueryRow(query,user.Id,user.Age, user.UpdatedAt).Scan(&id)
+	if err!=nil{
+		r.Bot.SendErrorNotification(err)
+		return 0, domain.ErrCouldNotScan
+	}
+	return id ,nil
+}
+func (r repo) UpdateWaist(user domain.UserInfo) (id int,err error){
+	query:=`
+	update user_info set waist=$2,updated_at=$3 where user_id=$1 returning id
+	`
+	err =r.db.QueryRow(query,user.Id,user.Waist, user.UpdatedAt).Scan(&id)
+	if err!=nil{
+		r.Bot.SendErrorNotification(err)
+		return 0, domain.ErrCouldNotScan
+	}
+	return id ,nil
+}
+func (r repo ) GetDoneExercise(){}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 func (r repo) CreateProgram(ageUp, ageDown int, bmi float64, programType _const.ProgramType, proType _const.ProType) (id int, err error) {
 	query := `
 	insert into programs (type,ageUp,ageDown,bmi,pro_type) values ($1,$2,$3,$4,$5) returning id
@@ -133,6 +244,10 @@ func (r repo) GetProgramByAge(age int) (int, error) {
 	select id from programs where  ageUp>$1 and ageDown<$1 and type=$2 and pro_type=$3
 `
 	rows, err := r.db.Query(query, age, _const.StressWork, _const.Personal)
+	if err!=nil{
+		r.Bot.SendErrorNotification(err)
+		return 0, domain.ErrCouldNotRetrieveFromDataBase
+	}
 	for rows.Next() {
 		var id int
 		err = rows.Scan(&id)
@@ -228,6 +343,9 @@ func (r repo) CreateExercise(name, info string, programId int) (id int, err erro
 	}
 	return id, nil
 }
+
+//func (r repo) GetExercises()
+
 func (r repo) GetAllExercise() {
 	// TODO implement
 }
