@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"testDeployment/internal/delivery/dto"
+	"DoctorWho/internal/delivery/dto"
 	"time"
 )
 

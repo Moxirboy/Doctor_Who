@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"testDeployment/internal/domain"
+	"DoctorWho/internal/domain"
 
 )
 func (r repo) FillDoctorInfo(info domain.Doctor) (id int, err error){

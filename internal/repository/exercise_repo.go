@@ -1,6 +1,6 @@
 package repository
 
-import "testDeployment/internal/domain"
+import "DoctorWho/internal/domain"
 
 func (r repo) CreateExercise(exercise domain.Exercise) (id int, err error) {
 	query := `

@@ -2,8 +2,8 @@ package usecase
 
 import (
 	"errors"
-	"testDeployment/internal/delivery/dto"
-	"testDeployment/internal/domain"
+	"DoctorWho/internal/delivery/dto"
+	"DoctorWho/internal/domain"
 )
 
 func (u usecase) FillInfo(user dto.UserInfo) (int, error) {

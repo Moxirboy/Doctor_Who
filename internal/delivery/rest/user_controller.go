@@ -2,9 +2,9 @@ package rest
 
 import (
 	"net/http"
-	"testDeployment/internal/domain"
-	"testDeployment/internal/pkg/jwt"
-	"testDeployment/internal/pkg/sms"
+	"DoctorWho/internal/domain"
+	"DoctorWho/internal/pkg/jwt"
+	"DoctorWho/internal/pkg/sms"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"

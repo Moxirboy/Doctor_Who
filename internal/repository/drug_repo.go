@@ -2,7 +2,7 @@ package repository
 
 import (
 	"strings"
-	"testDeployment/internal/domain"
+	"DoctorWho/internal/domain"
 )
 func ( r repo) GetAllDrug()(drugs []domain.Drug,err error){
 	query:=`
