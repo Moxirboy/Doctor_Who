@@ -9,7 +9,7 @@ Curify is a powerful application built with Golang that helps you manage and org
 Before getting started, ensure that you have the following installed on your machine:
 
 - Golang
-- Docker (optional but recommended)
+- Docker 
 
 ## Installation
 
