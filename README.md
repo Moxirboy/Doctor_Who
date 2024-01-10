@@ -33,7 +33,7 @@ Before getting started, ensure that you have the following installed on your mac
 
     Edit the `.env` file to set the required environment variables for your setup.
 
-4. **Run the following command to perform database migrations:**
+4. **Run the following command to perform database migrations after make start:**
 
     ```bash
     make migration-up
