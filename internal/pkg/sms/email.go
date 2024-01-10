@@ -4,13 +4,7 @@ import (
 	"math/rand"
 	"net/smtp"
 	"strconv"
-	"sync"
 	"time"
-)
-
-var (
-	verificationCodes = make(map[string]string)
-	mu                sync.Mutex
 )
 
 const smtpServer = "smtp.gmail.com"
@@ -22,7 +16,7 @@ const body = "Your verification code is: "
 
 func GenerateVerificationCode() string {
 	rand.Seed(time.Now().UnixNano())
-	return strconv.Itoa(rand.Intn(999999))
+	return strconv.Itoa(rand.Intn(9999))
 }
 
 func SendEmail(to, code string) error {

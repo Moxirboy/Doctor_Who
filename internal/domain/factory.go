@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"DoctorWho/internal/delivery/dto"
+	"testDeployment/internal/delivery/dto"
 	"time"
 )
 
@@ -11,6 +11,7 @@ type Factory struct {
 func (f Factory) CreateUser(newUser *NewUser) *User {
 	return &User{
 		phone_number: newUser.PhoneNumber,
+		password: newUser.Password,
 		role:         "user",
 		created_at:   time.Now().UTC(),
 		updated_at:   time.Now().UTC(),
@@ -42,6 +43,7 @@ func (f Factory) ParseModelToUserInfo(u dto.UserInfo) *UserInfo {
 		Height:    u.Height,
 		Age:       u.Age,
 		Waist:     u.Waist,
+		Gender: u.Gender,
 		UpdatedAt: time.Now(),
 	}
 }
@@ -52,5 +54,6 @@ func (f Factory) ParseUserInfoToModel(u UserInfo)  *dto.UserInfo{
 		Height:    u.Height,
 		Age:       u.Age,
 		Waist:     u.Waist,
+		Gender: u.Gender,
 	}
 }

@@ -6,6 +6,7 @@ const (
 	ErrCouldNotScan                 = Err("Cannot Scan from database")
 	ErrCouldNotCreateProgram        = Err("Cannot create program type")
 	ErrCouldNotRetrieveFromDataBase = Err("Cannot read from database")
+	ErrEmptyField=Err("empty space")
 )
 
 type Err string

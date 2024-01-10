@@ -1,46 +1,28 @@
 package middleware
 
 import (
-	jwt "DoctorWho/internal/pkg/jwt"
 	"net/http"
-	"strings"
+
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
+// AuthMiddleware is a middleware that checks if a user is authenticated (has a user_id in the session).
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		accessToken := c.GetHeader("Authorization")
+		session := sessions.Default(c)
 
-		if len(accessToken) == 0 {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is not provided"})
+		// Check if user_id exists in the session
+		userID := session.Get("userId")
+		if userID == nil {
+			c.Status(401)
+			// Redirect to the login page if user_id is not present
+			c.Redirect(http.StatusFound, "/v1/login")
+			c.Abort()
 			return
 		}
-
-		if !strings.HasPrefix(accessToken, "Bearer ") {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid Authorization header format"})
-			return
-		}
-
-		// Extract the token from the header
-		token := strings.TrimPrefix(accessToken, "Bearer ")
-
-		claims, err := jwt.VerifyToken(token)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token", "details": err.Error()})
-			return
-		}
-
-		_, ok := claims["sub"].(string)
-		if !ok {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid subject in token"})
-			return
-		}
-
-		// You can add more validations or actions here if needed.
-
-		// Set the claims in the context for later use
-		c.Set("claims", claims)
-
+	
+		// Call the next handler in the chain
 		c.Next()
 	}
 }

@@ -1,9 +1,7 @@
 package dto
 
-import "time"
-
 type User struct {
-	Id    string `json:"id"`
+	
 	Email string `json:"email"`
 }
 type UserInfo struct {
@@ -11,13 +9,9 @@ type UserInfo struct {
 	Name   string `json:"name"`
 	Weigh  string `json:"weigh"`
 	Height string `json:"height"`
-	Age    string `json:"age"`
+	Age    int `json:"age"`
+	Gender string `json:"gender"`
 	Waist  string `json:"waist"`
-}
-type Progress struct{
-	UserId int `json:"userId"`
-	Date time.Time `json:"date"`
-	Percentage int `json:"progress"`
 }
 
 type Program struct {

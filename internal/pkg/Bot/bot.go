@@ -1,9 +1,11 @@
 package Bot
 
 import (
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"fmt"
 	"log"
+	"runtime"
 	"time"
+	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 type bot struct {
@@ -22,8 +24,11 @@ const chatID = int64(-1002129341182)
 
 func (b bot) SendErrorNotification(err error) {
 	// Replace "USER_CHAT_ID" with the actual user's chat ID to send the notification
-
-	message := time.Now().Format("2006/02/31  15:04:05\n") + "Error occurred: "
+	if err==nil{
+		return
+	}
+	_, file, line, _ := runtime.Caller(1) // Get information about the calling function (1 level up in the call stack)
+	message := fmt.Sprintf(time.Now().Format("2006/01/02  15:04:05\n")+"Error in %s:%d\n%v", file, line, err)
 	msg := tgbotapi.NewMessage(chatID, message+err.Error())
 	_, err = b.Send(msg)
 	if err != nil {
@@ -31,11 +36,11 @@ func (b bot) SendErrorNotification(err error) {
 	}
 
 }
-func (b bot) SendNotification(mess string) {
+func (b bot) SendNotification(message string) {
 	// Replace "USER_CHAT_ID" with the actual user's chat ID to send the notification
-
-	message := time.Now().Format("2006/02/31  15:04:05 \nmessage: ") + mess
-	msg := tgbotapi.NewMessage(chatID, message)
+	_, file, line, _ := runtime.Caller(1) // Get information about the calling function (1 level up in the call stack)
+	logEntry := fmt.Sprintf(time.Now().Format("2006/01/02  15:04:05 \nmessage: ")+"[%s:%d]\n%s", file, line, message)
+	msg := tgbotapi.NewMessage(chatID, logEntry)
 	_, err := b.Send(msg)
 	if err != nil {
 		log.Printf("Error sending notification to user: %v", err)
