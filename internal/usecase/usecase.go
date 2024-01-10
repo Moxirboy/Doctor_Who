@@ -1,10 +1,10 @@
 package usecase
 
 import (
-	"testDeployment/internal/delivery/dto"
-	"testDeployment/internal/domain"
-	"testDeployment/internal/pkg/Bot"
-	"testDeployment/internal/repository"
+	"DoctorWho/internal/delivery/dto"
+	"DoctorWho/internal/domain"
+	"DoctorWho/internal/pkg/Bot"
+	"DoctorWho/internal/repository"
 )
 
 type usecase struct {

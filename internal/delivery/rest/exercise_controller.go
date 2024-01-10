@@ -5,8 +5,8 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
-	"testDeployment/internal/delivery/html"
-	"testDeployment/internal/domain"
+	"DoctorWho/internal/delivery/html"
+	"DoctorWho/internal/domain"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 )

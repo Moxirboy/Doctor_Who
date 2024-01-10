@@ -2,8 +2,8 @@ package rest
 
 import (
 	"net/http"
-	_const "testDeployment/internal/common/const"
-	"testDeployment/internal/delivery/dto"
+	_const "DoctorWho/internal/common/const"
+	"DoctorWho/internal/delivery/dto"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"

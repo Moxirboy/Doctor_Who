@@ -1,9 +1,9 @@
 package usecase
 
 import (
-	_const "testDeployment/internal/common/const"
-	"testDeployment/internal/delivery/dto"
-	"testDeployment/internal/domain"
+	_const "DoctorWho/internal/common/const"
+	"DoctorWho/internal/delivery/dto"
+	"DoctorWho/internal/domain"
 	"time"
 )
 

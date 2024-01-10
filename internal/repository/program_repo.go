@@ -2,9 +2,9 @@ package repository
 
 import (
 	"log"
-	_const "testDeployment/internal/common/const"
-	"testDeployment/internal/delivery/dto"
-	"testDeployment/internal/domain"
+	_const "DoctorWho/internal/common/const"
+	"DoctorWho/internal/delivery/dto"
+	"DoctorWho/internal/domain"
 )
 
 func (r repo) CreateProgram(pro domain.Program, proType _const.ProType) (id int, err error) {

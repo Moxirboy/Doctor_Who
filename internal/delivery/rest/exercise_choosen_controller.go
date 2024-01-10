@@ -2,7 +2,7 @@ package rest
 
 import (
 
-	"testDeployment/internal/domain"
+	"DoctorWho/internal/domain"
 
 	"github.com/gin-gonic/gin"
 )

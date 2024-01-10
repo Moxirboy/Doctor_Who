@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"testDeployment/internal/pkg/Bot"
-	"testDeployment/internal/usecase"
+	"DoctorWho/internal/pkg/Bot"
+	"DoctorWho/internal/usecase"
 )
 
 type controller struct {

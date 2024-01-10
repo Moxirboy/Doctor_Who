@@ -1,6 +1,6 @@
 package usecase
 
-import "testDeployment/internal/domain"
+import "DoctorWho/internal/domain"
 
 func (u usecase) CreateExercise(exercise domain.Exercise) (id int, err error) {
 	id, err = u.repo.CreateExercise(exercise)

@@ -1,6 +1,6 @@
 package usecase
 
-import "testDeployment/internal/domain"
+import "DoctorWho/internal/domain"
 
 func (u usecase) CreateDrug(drug domain.Drug) (id int, err error) {
 	id, err = u.repo.InsertDrug(drug)

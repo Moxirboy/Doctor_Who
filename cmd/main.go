@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	configs "testDeployment/internal/common/config"
-	"testDeployment/internal/delivery/rest"
-	"testDeployment/internal/pkg/Bot"
-	"testDeployment/internal/pkg/middleware"
-	"testDeployment/internal/repository"
-	"testDeployment/internal/usecase"
+	configs "DoctorWho/internal/common/config"
+	"DoctorWho/internal/delivery/rest"
+	"DoctorWho/internal/pkg/Bot"
+	"DoctorWho/internal/pkg/middleware"
+	"DoctorWho/internal/repository"
+	"DoctorWho/internal/usecase"
 	"time"
 
 	"github.com/gin-contrib/sessions"
@@ -31,19 +31,21 @@ func main() {
 	})
 	r.Use(sessions.Sessions("mysession", store))
 	r.Use(gin.Recovery())
-	token := "6497806085:AAE7RRULTJARZ5YTP163We6ri4mnSK1OHBk"
-	bot, err := configs.BotConfi(token)
+	instance := configs.Configuration()
+	bot, err := configs.NewBotConfig(*instance)
+	
 	NewBot := Bot.NewBot(bot)
 	if err != nil {
 		NewBot.SendErrorNotification(err)
 		return
 	}
-	config, err := configs.NewPostgresConfig()
+	postgres, err := configs.NewPostgresConfig(*instance)
+	
 	if err != nil {
 		NewBot.SendErrorNotification(err)
 		return
 	}
-	repo := repository.NewRepo(config, NewBot)
+	repo := repository.NewRepo(postgres, NewBot)
 	service := usecase.NewUserUsecase(repo, NewBot)
 	controller := rest.NewController(service, NewBot)
 	save := r.Group("/save")

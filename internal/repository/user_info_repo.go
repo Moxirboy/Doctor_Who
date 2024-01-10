@@ -2,7 +2,7 @@ package repository
 
 import (
 	"errors"
-	"testDeployment/internal/domain"
+	"DoctorWho/internal/domain"
 	"time"
 )
 

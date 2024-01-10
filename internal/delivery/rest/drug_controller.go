@@ -8,8 +8,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"testDeployment/internal/delivery/html"
-	"testDeployment/internal/domain"
+	"DoctorWho/internal/delivery/html"
+	"DoctorWho/internal/domain"
 )
 
 func (cr controller) DrugIndexHandler(c *gin.Context) {

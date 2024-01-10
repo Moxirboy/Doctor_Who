@@ -1,7 +1,7 @@
 package usecase
 import (
 	"errors"
-	"testDeployment/internal/domain"
+	"DoctorWho/internal/domain"
 )
 
 func (u usecase) RegisterDoctor(newUser *domain.NewUser) (int, error) {

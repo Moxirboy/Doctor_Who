@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"testDeployment/internal/delivery/dto"
-	"testDeployment/internal/domain"
+	"DoctorWho/internal/delivery/dto"
+	"DoctorWho/internal/domain"
 )
 
 func (r repo) GetDoneExercise(personal domain.PersonalExercisesDone) (booller []bool, err error) {

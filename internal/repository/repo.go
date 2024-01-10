@@ -2,10 +2,10 @@ package repository
 
 import (
 	"database/sql"
-	"testDeployment/internal/common/const"
-	"testDeployment/internal/delivery/dto"
-	"testDeployment/internal/domain"
-	"testDeployment/internal/pkg/Bot"
+	"DoctorWho/internal/common/const"
+	"DoctorWho/internal/delivery/dto"
+	"DoctorWho/internal/domain"
+	"DoctorWho/internal/pkg/Bot"
 	"time"
 )
 
