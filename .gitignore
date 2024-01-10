@@ -2,7 +2,7 @@
 *.log
 *.DS_Store
 .vscode
-.idea
+*.idea
 .idea/
 __MACOSX/
 bin/
@@ -11,4 +11,4 @@ bin/
 .go-cache
 .go
 /.idea
-.env
+*.env
