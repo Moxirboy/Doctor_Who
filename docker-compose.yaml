@@ -3,8 +3,8 @@ version: '3.8'
 services:
   app:
     build:
-      context: ./docker/dev
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/dev/Dockerfile
     volumes:
       - .:/app
       - ./.go/pkg:/go/pkg
@@ -16,6 +16,7 @@ services:
       - .env
     environment:
       GOCACHE: /go-cache
+
   migrate:
     image: migrate/migrate
     volumes:
@@ -29,6 +30,6 @@ services:
     image: postgres:latest
     environment:
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: DoctorWho
+      POSTGRES_DB: doctor_who
     ports:
       - "5432"
