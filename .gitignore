@@ -10,3 +10,5 @@ bin/
 .werf_secret_key
 .go-cache
 .go
+/.idea
+.env
