@@ -2,8 +2,7 @@ package rest
 
 import (
 	"net/http"
-	_const "DoctorWho/internal/common/const"
-	"DoctorWho/internal/delivery/dto"
+	"testDeployment/internal/delivery/dto"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -29,10 +28,9 @@ func (c controller) FillUserInfo(ctx *gin.Context) {
 		})
 		return
 	}
-	_, _, _ = c.usecase.AutoExercise(UserInfo.Id, dto.ProgramType(_const.StressWork))
-	_, date, _ := c.usecase.AutoExercise(UserInfo.Id, dto.ProgramType(_const.WeightLoss))
-	s.Set("stress", date)
-	s.Set("weight", date)
+	s.Set("name", UserInfo.Name)
+	s.Set("age", UserInfo.Age)
+	s.Set("gender", UserInfo.Gender)
 	s.Save()
 	ctx.JSON(200, gin.H{
 		"Message": "success",

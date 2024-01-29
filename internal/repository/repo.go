@@ -2,10 +2,10 @@ package repository
 
 import (
 	"database/sql"
-	"DoctorWho/internal/common/const"
-	"DoctorWho/internal/delivery/dto"
-	"DoctorWho/internal/domain"
-	"DoctorWho/internal/pkg/Bot"
+	"context"
+	"testDeployment/internal/delivery/dto"
+	"testDeployment/internal/domain"
+	"testDeployment/pkg/Bot"
 	"time"
 )
 
@@ -35,28 +35,21 @@ type Repo interface {
 	ExistUserInfo(userId int) (bool, error)
 	UpdateInfo(user domain.UserInfo) (id int, err error)
 	UpdateName(user domain.UserInfo) (id int, err error)
-	UpdateWeigh(user domain.UserInfo) (id int, err error)
-	UpdateHeight(user domain.UserInfo) (id int, err error)
 	UpdateAge(user domain.UserInfo) (id int, err error)
-	UpdateWaist(user domain.UserInfo) (id int, err error)
 	UpdateGender(user domain.UserInfo) (id int, err error)
-	CreateProgram(pro domain.Program, proType _const.ProType) (id int, err error)
 	UpdateVerified(userId interface{}) (err error)
-	GetPersonalExerciseChoosen(userId int, date string, proType string) (exercises []domain.PersonalExercises, err error)
-	UpdateDone(mark domain.MarkAsDone) (id int, err error)
-	GetDoneExercise(personal domain.PersonalExercisesDone) (booller []bool, err error)
 	InsertDrug(drug domain.Drug) (id int, err error)
 	CreatePhoto(id int, path []string) (err error)
 	GetDrugByName(name string) (drugs []domain.Drug, err error)
 	GetDrugById(id string) (drug domain.Drug, err error)
-	GetAllPrograms() (pros []domain.Program, err error)
-	CreateExercise(exercise domain.Exercise) (id int, err error)
-	GetAllExercise() (exe []domain.Exercise, err error)
-	GetRecommendedProgram(age int, bmi float64, tip dto.ProgramType) (ids []int, err error)
-	GetExercises(programId int) (ids []int, err error)
-	CreateExerciseChoosen(id, userId int, tip dto.ProgramType, createdAt string) (err error)
 	GetAllDrug()(drugs []domain.Drug,err error)
-	FillDoctorInfo(info domain.Doctor) (id int, err error)
+	CreateDoctorInfo(info domain.Doctor) (id int, err error)
+	GetPhotoPath(id int) (path []string,err error)
+	CreateMessage(userId string,isAi bool,message string,time string) (id int,err error)
+	GetAllMessages(userId string )(messages []domain.Message,err error)
+	UpdatePhoto(path string) (id int,err error)
+	GetDrugByType(ctx context.Context,tip string)(drugs []domain.DrugWithoutType,err error)
+	GetAllTypes(ctx context.Context)(Types []domain.DrugByType,err error)
 }
 
 func NewRepo(db *sql.DB, bot Bot.Bot) Repo {

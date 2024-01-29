@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"DoctorWho/internal/domain"
+	"testDeployment/internal/domain"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,8 +23,3 @@ func(c controller) CreateDoctor(ctx *gin.Context){
 	})
 }
 
-// func ( c controller) FillDoctorInfo(ctx *gin.Context){
-// 	var Doctor domain.Doctor
-// 	ctx.ShouldBindJSON(&Doctor)
-// 	id ,err:=
-// }

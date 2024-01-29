@@ -2,7 +2,7 @@ package repository
 
 import (
 	"errors"
-	"DoctorWho/internal/domain"
+	"testDeployment/internal/domain"
 	"time"
 )
 
@@ -34,9 +34,9 @@ func (r repo) ExistUserInfo(userId int) (exist bool, err error) {
 }
 func (r repo) CreateInfo(user domain.UserInfo) (id int, err error) {
 	query := `
-	insert into  user_info (user_id,name,weigh,height,age,waist,created_at,gender) values($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id
+	insert into  user_info (user_id,name,age,waist,created_at,gender) values($1,$2,$3,$4,$5,$6) RETURNING id
 `
-	row := r.db.QueryRow(query, user.Id, user.Name, user.Weigh, user.Height, user.Age, user.Waist, user.UpdatedAt, user.Gender)
+	row := r.db.QueryRow(query, user.Id, user.Name,  user.Age, user.UpdatedAt, user.Gender)
 	if err = row.Scan(&id); err != nil {
 		r.Bot.SendErrorNotification(err)
 		return 0, err
@@ -45,15 +45,12 @@ func (r repo) CreateInfo(user domain.UserInfo) (id int, err error) {
 }
 func (r repo) GetUserInfo(userId int) (user domain.UserInfo, err error) {
 	query := `
-	select id, name,weigh,height,age,waist,gender from user_info where user_id=$1
+	select id, name,age,gender from user_info where user_id=$1
 	`
 	err = r.db.QueryRow(query, userId).Scan(
 		&user.Id,
 		&user.Name,
-		&user.Weigh,
-		&user.Height,
 		&user.Age,
-		&user.Waist,
 		&user.Gender,
 	)
 	if err != nil {
@@ -65,9 +62,9 @@ func (r repo) GetUserInfo(userId int) (user domain.UserInfo, err error) {
 
 func (r repo) UpdateInfo(user domain.UserInfo) (id int, err error) {
 	query := `
-	update user_info set name=$2,weigh=$3,height=$4,age=$5,waist=$6,updated_at=$7,gender=$8 where user_id=$1 returning id
+	update user_info set name=$2,age=$3,updated_at=$4,gender=$5 where user_id=$1 returning id
 	`
-	err = r.db.QueryRow(query, user.Id, user.Name, user.Weigh, user.Height, user.Age, user.Waist, user.UpdatedAt, user.Gender).Scan(&id)
+	err = r.db.QueryRow(query, user.Id, user.Name, user.Age, user.UpdatedAt, user.Gender).Scan(&id)
 	if err != nil {
 		r.Bot.SendErrorNotification(err)
 		return 0, domain.ErrCouldNotScan
@@ -87,9 +84,9 @@ func (r repo) UpdateName(user domain.UserInfo) (id int, err error) {
 }
 func (r repo) UpdateWeigh(user domain.UserInfo) (id int, err error) {
 	query := `
-	update user_info set weigh=$2,updated_at=$3 where user_id=$1 returning id
+	update user_info set updated_at=$2 where user_id=$1 returning id
 	`
-	err = r.db.QueryRow(query, user.Id, user.Weigh, user.UpdatedAt).Scan(&id)
+	err = r.db.QueryRow(query, user.Id,  user.UpdatedAt).Scan(&id)
 	if err != nil {
 		r.Bot.SendErrorNotification(err)
 		return 0, domain.ErrCouldNotScan
@@ -98,9 +95,9 @@ func (r repo) UpdateWeigh(user domain.UserInfo) (id int, err error) {
 }
 func (r repo) UpdateHeight(user domain.UserInfo) (id int, err error) {
 	query := `
-	update user_info set height=$2,updated_at=$3 where user_id=$1 returning id
+	update user_info set updated_at=$2 where user_id=$1 returning id
 	`
-	err = r.db.QueryRow(query, user.Id, user.Height, user.UpdatedAt).Scan(&id)
+	err = r.db.QueryRow(query, user.Id,  user.UpdatedAt).Scan(&id)
 	if err != nil {
 		r.Bot.SendErrorNotification(err)
 		return 0, domain.ErrCouldNotScan
@@ -122,9 +119,9 @@ func (r repo) UpdateAge(user domain.UserInfo) (id int, err error) {
 }
 func (r repo) UpdateWaist(user domain.UserInfo) (id int, err error) {
 	query := `
-	update user_info set waist=$2,updated_at=$3 where user_id=$1 returning id
+	update user_info set updated_at=$2 where user_id=$1 returning id
 	`
-	err = r.db.QueryRow(query, user.Id, user.Waist, user.UpdatedAt).Scan(&id)
+	err = r.db.QueryRow(query, user.Id,  user.UpdatedAt).Scan(&id)
 	if err != nil {
 		r.Bot.SendErrorNotification(err)
 		return 0, domain.ErrCouldNotScan

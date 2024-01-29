@@ -2,8 +2,8 @@ package usecase
 
 import (
 	"errors"
-	"DoctorWho/internal/delivery/dto"
-	"DoctorWho/internal/domain"
+	"testDeployment/internal/delivery/dto"
+	"testDeployment/internal/domain"
 )
 
 func (u usecase) FillInfo(user dto.UserInfo) (int, error) {
@@ -25,33 +25,12 @@ func (u usecase) UpdateInfo(user dto.UserInfo) (id int, err error) {
 			return 0, domain.Err("Coudn`t update Name")
 		}
 	}
-	if !Validator(userInfo.Height) {
-
-		id, err = u.repo.UpdateHeight(*userInfo)
-		if err != nil {
-			u.bot.SendErrorNotification(err)
-			return 0, domain.Err("Coudn`t update Height")
-		}
-	}
+	
 	if !ValidatorAge(userInfo.Age) {
 		id, err = u.repo.UpdateAge(*userInfo)
 		if err != nil {
 			u.bot.SendErrorNotification(err)
 			return 0, domain.Err("Coudn`t update Age")
-		}
-	}
-	if !Validator(userInfo.Waist) {
-		id, err = u.repo.UpdateWaist(*userInfo)
-		if err != nil {
-			u.bot.SendErrorNotification(err)
-			return 0, domain.Err("Coudn`t update Waist")
-		}
-	}
-	if !Validator(userInfo.Weigh) {
-		id, err = u.repo.UpdateWeigh(*userInfo)
-		if err != nil {
-			u.bot.SendErrorNotification(err)
-			return 0, domain.Err("Coudn`t update Weigh")
 		}
 	}
 	if !Validator(userInfo.Gender) {
@@ -79,4 +58,25 @@ func (u usecase) GetUserInfo(userId int) (user dto.UserInfo, err error) {
 	}
 	user = *u.f.ParseUserInfoToModel(userInfo)
 	return user, nil
+}
+func (u usecase) GetName(userId int,Error error) (name string, err error) {
+	if Error!=nil{
+		u.bot.SendErrorNotification(err)
+		return "", errors.New("no info")
+	}
+	exist, err := u.repo.ExistUserInfo(userId)
+	if err != nil || errors.Is(err, domain.ErrCouldNotScan) {
+		u.bot.SendErrorNotification(err)
+		return "", errors.New("no info")
+	}
+	if !exist {
+		return "", errors.New("no info")
+	}
+	userInfo, err := u.repo.GetUserInfo(userId)
+	if err != nil {
+		u.bot.SendErrorNotification(err)
+		return "", domain.ErrCouldNotScan
+	}
+	user := *u.f.ParseUserInfoToModel(userInfo)
+	return user.Name, nil
 }
