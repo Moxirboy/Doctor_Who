@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Curify is a powerful application built with Golang that helps you manage and organize your data seamlessly. This readme provides instructions on how to set up and run the Curify app on your local environment.
+Curify is a powerful application built with Golang that helps you manage and organize your data seamlessly. This readme provides instructions on how to set up and run the Curify app on your local environment. link to IOS app :[Link](https://docs.google.com/presentation/d/1RS86pYOlZsh2gHMsRMj2M21ZYzeENN5Izh0R2cPrK3Q/edit?usp=drive_link).
 
 ## Prerequisites
 
