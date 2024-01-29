@@ -1,7 +1,7 @@
 package usecase
 import (
 	"errors"
-	"DoctorWho/internal/domain"
+	"testDeployment/internal/domain"
 )
 
 func (u usecase) RegisterDoctor(newUser *domain.NewUser) (int, error) {
@@ -18,13 +18,30 @@ func (u usecase) FillDoctorInfo(info domain.Doctor) (int ,error){
 	if empty{
 		return 0 ,domain.ErrEmptyField
 	}
-	id,err:=u.repo.FillDoctorInfo(info)
+	id,err:=u.repo.CreateDoctorInfo(info)
 	if err!=nil{
 		return 0 ,err
 	}
 	return id ,err
 }
-// func (u usecase) ChangeInfo()
-// func (u usecase) ChangePhoto(photo string) (id  int ,err error){
-
-// }
+func (u usecase) ChangeInfo(info domain.Doctor)(id int,err error){
+	id,err=u.repo.CreateDoctorInfo(info)
+	if err!=nil{
+		u.bot.SendErrorNotification(err)
+		return 0, err
+	}
+	return id, nil
+}
+func (u usecase) ChangePhoto(path string) (id int ,err error){
+	id,err=u.repo.UpdatePhoto(path)
+	if err != nil {
+		u.bot.SendErrorNotification(err)
+		return 0, err
+	}
+	return id, nil
+}
+//func(u usecase) PublishRecommStress()
+//// func (u usecase) ChangeInfo()
+//// func (u usecase) ChangePhoto(photo string) (id  int ,err error){
+//
+//// }

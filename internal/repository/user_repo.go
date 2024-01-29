@@ -2,8 +2,8 @@ package repository
 
 import (
 	"errors"
-	"DoctorWho/internal/delivery/dto"
-	"DoctorWho/internal/domain"
+	"testDeployment/internal/delivery/dto"
+	"testDeployment/internal/domain"
 	"time"
 )
 

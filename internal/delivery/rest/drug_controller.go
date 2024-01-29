@@ -5,11 +5,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"html/template"
 	"io"
+
 	"log"
 	"net/http"
 	"os"
-	"DoctorWho/internal/delivery/html"
-	"DoctorWho/internal/domain"
+	
+	"testDeployment/internal/delivery/html"
+	"testDeployment/internal/domain"
 )
 
 func (cr controller) DrugIndexHandler(c *gin.Context) {
@@ -42,6 +44,11 @@ func (cr controller) DrugUploadHandler(c *gin.Context) {
 	}
 
 	Form.Description = c.PostForm("description")
+	if Form.Description == "" {
+		c.String(http.StatusBadRequest, "description cannot be empty")
+		return
+	}
+	Form.Type = form.Value["type"]
 	if Form.Description == "" {
 		c.String(http.StatusBadRequest, "description cannot be empty")
 		return
@@ -93,7 +100,7 @@ func (cr controller) DrugUploadHandler(c *gin.Context) {
 		}
 		defer outFile.Close()
 		io.Copy(outFile, src)
-		Form.Photo = append(Form.Photo, dirPath+"/"+file.Filename)
+		Form.Photo = append(Form.Photo, "https://open-data.up.railway.app/api/v1/path?path="+dirPath+"/"+file.Filename)
 
 	}
 	_, err = cr.usecase.CreateDrug(Form)
@@ -104,26 +111,34 @@ func (cr controller) DrugUploadHandler(c *gin.Context) {
 	}
 	// Redirect to the homepage with the list of uploaded images as query parameters
 	c.Status(200)
-	c.Redirect(http.StatusSeeOther,"/save/drugs")}
+	c.Redirect(http.StatusSeeOther, "/api/v1/save/drugs")
+}
 func (c controller) SearchDrug(ctx *gin.Context) {
 	var drug domain.DrugSearch
-drug.Name = ctx.Query("name")
+	drug.Name = ctx.Query("name")
 
-result, err := c.usecase.GetDrugs(drug)
-if err != nil {
-    ctx.JSON(406, gin.H{
-        "Message": "No such drug",
-    })
-    return
-}
-
-ctx.JSON(200, result)
+	result, err := c.usecase.GetDrugs(drug)
+	if err != nil {
+		ctx.JSON(406, gin.H{
+			"Message": "No such drug",
+		})
+		return
+	}
+	ctx.JSON(200,result)
 }
 func (c controller) GetDrug(ctx *gin.Context) {
-	
+
 	var Drug domain.DrugSearch
 	err := ctx.ShouldBindJSON(&Drug)
-	Drug.Id=ctx.Query("id")
+	if err != nil {
+		if err != nil {
+			ctx.JSON(406, gin.H{
+				"Message": "invalid credentials",
+			})
+			return
+		}
+	}
+	Drug.Id = ctx.Query("id")
 	drug, err := c.usecase.GetDrug(Drug)
 	if err != nil {
 		ctx.JSON(406, gin.H{
@@ -133,8 +148,8 @@ func (c controller) GetDrug(ctx *gin.Context) {
 	}
 	ctx.JSON(200, drug)
 }
-func( c controller) GetAllDrug(ctx *gin.Context){
-	drugs,err:=c.usecase.GetAllDrug()
+func (c controller) GetAllDrug(ctx *gin.Context) {
+	drugs, err := c.usecase.GetAllDrug()
 	if err != nil {
 		ctx.JSON(406, gin.H{
 			"Message": "No  drug",
@@ -142,4 +157,24 @@ func( c controller) GetAllDrug(ctx *gin.Context){
 		return
 	}
 	ctx.JSON(200, drugs)
+}
+func (c controller) GetDrugByType(ctx *gin.Context){
+	tip:=ctx.Param("type")
+	res,err:=c.usecase.GetDrugByType(ctx,tip)
+	if err!=nil{
+		ctx.JSON(200,gin.H{
+			"error":err,
+		})
+	}
+	ctx.JSON(200,res)
+
+}
+func (c controller )GetAllTypes(ctx *gin.Context){
+	res,err:=c.usecase.GetAllTypes(ctx)
+	if err!=nil{
+		ctx.JSON(200,gin.H{
+			"error":err,
+			})
+	}
+	ctx.JSON(200,res)
 }

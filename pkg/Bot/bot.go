@@ -20,7 +20,7 @@ func NewBot(botAPI *tgbotapi.BotAPI) Bot {
 	return &bot{BotAPI: botAPI}
 }
 
-const chatID = int64(-1002129341182)
+const chatID = int64(-4103413678)
 
 func (b bot) SendErrorNotification(err error) {
 	// Replace "USER_CHAT_ID" with the actual user's chat ID to send the notification

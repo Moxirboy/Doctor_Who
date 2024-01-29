@@ -26,6 +26,9 @@ type JWT struct {
 	Salt       string `env:"SALT"`
 	TokenTTL   string `env:"TOKEN_TTL"`
 }
+type Server struct{
+	Port string
+}
 type InitConfig struct {
 	RunPort string `env:"RUN_PORT"`
 }
@@ -40,6 +43,7 @@ func Configuration() *Config {
 	if err := env.Parse(&instance); err != nil {
 		panic(err)
 	}
+	instance.BotConfig.BotToken=""
 	return &instance
 
 }

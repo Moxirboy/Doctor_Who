@@ -1,10 +1,12 @@
 package usecase
 
 import (
-	"DoctorWho/internal/delivery/dto"
-	"DoctorWho/internal/domain"
-	"DoctorWho/internal/pkg/Bot"
-	"DoctorWho/internal/repository"
+	"context"
+	"testDeployment/internal/delivery/dto"
+	"testDeployment/internal/domain"
+	"testDeployment/pkg/Bot"
+	"testDeployment/internal/repository"
+	"testDeployment/pkg/utils"
 )
 
 type usecase struct {
@@ -23,22 +25,31 @@ type Usecase interface {
 	GetUserInfo(userId int) (user dto.UserInfo, err error)
 	UpdateInfo(user dto.UserInfo) (id int, err error)
 	UpdateIsVerified(userId interface{}) (err error)
-	GetProgramForWeightLoss(userId int) (exercise []domain.PersonalExercises, err error)
-	GetProgress(personal domain.PersonalExercisesDone) (prog float64, err error)
-	MarkAsDone(mark domain.MarkAsDone) (id int, err error)
-	GetProgramForStress(userId int) (exercise []domain.PersonalExercises, err error)
 	CreateDrug(drug domain.Drug) (id int, err error)
 	GetDrugs(drugS domain.DrugSearch) (drugs []domain.Drug, err error)
 	GetDrug(d domain.DrugSearch) (drug domain.Drug, err error)
-	CreateProgram(pro domain.Program) (id int, err error)
-	GetAllPrograms() (pro []domain.Program, err error)
-	CreateExercise(exercise domain.Exercise) (id int, err error)
-	GetAllExercise() (exe []domain.Exercise, err error)
-	AutoExercise(userId int, programType dto.ProgramType) (bool, string, error)
-	autoExerciseCreate(userId int, programType dto.ProgramType, date string) (bool, error)
-	createExerciseChoices(exercises []int, userId int, programType dto.ProgramType, date string) error
 	GetAllDrug()(drugs []domain.Drug,err error)
+	GetName(userId int,Error error) (name string, err error)
+	SaveMessage(userId string,isAi bool,message string) (id int,err error)
+	GetAllMessages(userId int )(messages []domain.Message,err error)
+	GetDrugByType(ctx context.Context,tip string)(drugs []domain.DrugWithoutType,err error)
+	GetAllTypes(ctx context.Context)(Types []domain.DrugByType,err error)
 }
+type INewsUseCase interface{
+	GetAll(ctx context.Context,query utils.PaginationQuery)(news *domain.NewsList,err error)
+	GetOneById(ctx context.Context,id string) (new *domain.NewWithSinglePhoto,err error)
+}
+
+type IDoctorUsecase interface{
+	GetAll(ctx context.Context) ([]*domain.DoctorByType,error)
+	GetOneByID(ctx context.Context,name string)  ([]*domain.DoctorWithType,error)
+}
+
+type IScheduleUseCase interface{
+	Create(ctx context.Context,schedule *domain.Schedule) error
+	GetAll(ctx context.Context,userId int)([]*domain.ScheduleResponse,error)
+}
+
 
 func NewUserUsecase(repo repository.Repo, bot Bot.Bot) Usecase {
 	return &usecase{repo: repo, bot: bot}

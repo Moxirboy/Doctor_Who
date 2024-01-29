@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 	"reflect"
-	"DoctorWho/internal/domain"
+	"testDeployment/internal/domain"
 )
 
 func Validator(str string) bool {

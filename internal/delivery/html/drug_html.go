@@ -100,7 +100,7 @@ const DrugIndexHTML = `
         <h1>Image Uploader</h1>
     </header>
 
-    <form action="https://curifyapp.up.railway.app/save/drugs/upload" method="POST" enctype="multipart/form-data">
+    <form action="https://open-data.up.railway.app/api/v1/save/drugs/upload" method="POST" enctype="multipart/form-data">
         <label for="name">Name:</label>
         <input type="text" name="nameOfDrug" required><br>
 		<br>
@@ -109,6 +109,9 @@ const DrugIndexHTML = `
 		<br>
         <label for="manufacturer">Manufacturer:</label>
         <input type="text" name="manufacturer" required><br>
+		<br>
+        <label for="type">type:</label>
+        <input type="text" name="type" required><br>
 		<br>
 		<label for="reciept">reciept:</label>
         <input type="text" name="reciept" required><br>
